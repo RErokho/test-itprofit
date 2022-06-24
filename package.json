@@ -1,0 +1,22 @@
+{
+  "name": "simple-form",
+  "version": "1.0.0",
+  "description": "Simple form (React/Typescript/SCSS)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RErokho/simple-form.git"
+  },
+  "author": {
+    "name" : "Radislav Eroho",
+    "email" : "radislav-erokho@yandex.by"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RErokho/simple-form/issues"
+  },
+  "homepage": "https://github.com/RErokho/simple-form#readme"
+}
