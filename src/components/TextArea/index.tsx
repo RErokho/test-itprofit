@@ -1,73 +1,78 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 
-import { TTextAreaChangeHandler } from "../../shared/types";
-import {
-  TEXT_MAX_ERROR_MESSAGE,
-  TEXT_MAX_LENGTH,
-  TEXT_MIN_ERROR_MESSAGE,
-  TEXT_MIN_LENGTH,
-} from "../../constants";
+import styles from "./styles.module.scss";
+import { TTextArea } from "./types";
+import { TEXT_PLACEHOLDER } from "./constants";
 
 import InputWrapper from "../InputWrapper";
 
-import { TTextArea } from "./types";
-import styles from "./styles.module.scss";
-
-const PADDING = 8;
+import useValidate from "../../hooks/useValidate";
+import { TTextAreaChangeHandler } from "../../shared/types";
+import { ValidatorField } from "../../hooks/useValidate/constants";
+import { LATIN_NUM_PUNCT_REG } from "../../shared/constants";
 
 const TextArea: TTextArea = (props) => {
-  const { value, onChange, label } = props;
+  const { value, onChange, label, error, message } = props;
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [text, setText] = useState<string>(value || "");
-  const [isCorrect, setIsCorrect] = useState<boolean>(true);
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const [text, setText] = useState<string | null>(value);
+
+  const errors = useValidate(ValidatorField.Text, text);
 
   const changeHandler: TTextAreaChangeHandler = useCallback(
     (event) => {
       const { value } = event.target;
 
-      const isCorrected =
-        value.length >= TEXT_MIN_LENGTH && value.length <= TEXT_MAX_LENGTH;
+      if (!LATIN_NUM_PUNCT_REG.test(value)) {
+        return;
+      }
 
-      setIsCorrect(isCorrected);
       setText(value);
-
-      onChange(isCorrected ? value : null);
+      onChange(value);
     },
-    [onChange, setIsCorrect, setText]
+    [setText, onChange]
   );
 
+  /*
+    TODO:Move to hook
+    Textarea auto resize
+   */
   useEffect(() => {
-    if (textareaRef.current === null) {
+    if (ref.current === null) {
       return;
     }
 
-    textareaRef.current.style.height = "0px";
-    textareaRef.current.style.height =
-      textareaRef.current.scrollHeight - PADDING * 2 + "px";
-  }, [text, textareaRef]);
+    ref.current.style.height = "0px";
+    ref.current.style.height = ref.current.scrollHeight + "px";
+  }, [text, ref]);
 
+  /*
+    Update 'text' if 'value' changes
+  */
   useEffect(() => {
-    setText(value || "");
-  }, [value]);
+    if (value === text) {
+      return;
+    }
 
-  const errorMessage = isCorrect
-    ? ""
-    : text.length <= TEXT_MAX_LENGTH
-    ? TEXT_MIN_ERROR_MESSAGE
-    : TEXT_MAX_ERROR_MESSAGE;
+    setText(value);
+  }, [setText, value, text]);
+
+  const hasWarning = text !== null && text.length > 0 && errors.length > 0;
+  const msg = hasWarning ? errors[0] : message;
 
   return (
     <InputWrapper
-      errorMessage={errorMessage}
+      message={msg}
+      warning={hasWarning}
+      error={error}
       label={label}
       render={(classes) => (
         <textarea
-          ref={textareaRef}
+          ref={ref}
           className={classNames(classes, styles.textarea)}
-          placeholder={"Message"}
-          value={text}
+          placeholder={TEXT_PLACEHOLDER}
+          value={text === null ? "" : text}
           onChange={changeHandler}
         />
       )}

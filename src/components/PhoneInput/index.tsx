@@ -1,58 +1,108 @@
-import React, { memo, useCallback, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 
-import { TInputChangeHandler } from "../../shared/types";
-import {
-  PHONE_ERROR_MESSAGE,
-  PHONE_MAX_LENGTH,
-  PHONE_REG,
-} from "../../constants";
+import { TChangePosition, TData, TPhoneInput } from "./types";
+import { getInitData, getPhone } from "./utils";
+import { PHONE_PLACEHOLDER } from "./constants";
 
 import InputWrapper from "../InputWrapper";
 
-import { TPhoneInput } from "./types";
+import useValidate from "../../hooks/useValidate";
+import { TInputChangeHandler } from "../../shared/types";
+import { ValidatorField } from "../../hooks/useValidate/constants";
 
 const PhoneInput: TPhoneInput = (props) => {
-  const { value, onChange, label } = props;
+  const { value, onChange, label, message, error } = props;
 
-  const [phone, setPhone] = useState<string>(value || "");
-  const [isCorrect, setIsCorrect] = useState<boolean>(true);
+  const ref = useRef<HTMLInputElement>(null);
+  const [data, setData] = useState<TData>(
+    getInitData(value === null ? "" : value)
+  );
+  const [isFocused, setFocused] = useState<boolean>(false);
+
+  const { phone, template, position } = data;
+
+  const errors = useValidate(ValidatorField.Phone, phone);
 
   const changeHandler: TInputChangeHandler = useCallback(
     (event) => {
       const { value } = event.target;
 
-      const replaced = value.replace(/\s/g, "");
+      let result: string;
 
-      if (
-        (replaced !== "" && !+replaced) ||
-        replaced.length > PHONE_MAX_LENGTH
-      ) {
-        return;
+      if (value.length < template.length) {
+        result = phone.slice(0, -1);
+      } else {
+        result = getPhone(value);
       }
-      setPhone(replaced);
 
-      const isCorrect = PHONE_REG.test(replaced);
-      setIsCorrect(isCorrect);
+      const data = getInitData(result);
+      const { phone: newPhone } = data;
 
-      onChange(isCorrect ? replaced : null);
+      setData(data);
+      onChange(newPhone);
     },
-    [onChange, setIsCorrect]
+    [setData, phone, onChange]
   );
 
+  const changePosition: TChangePosition = useCallback(() => {
+    if (ref === null || ref.current === null) {
+      return;
+    }
+
+    ref.current.setSelectionRange(position, position);
+  }, [ref, data, position]);
+
+  /*
+    Update 'phone' if 'value' changes
+  */
   useEffect(() => {
-      setPhone(value || "");
-  }, [value]);
+    if (value === phone) {
+      return;
+    }
+
+    setData(getInitData(value === null ? "" : value));
+  }, [setData, value, phone]);
+
+  /*
+    TODO: Move to hook
+    Update cursor position
+  */
+  useEffect(() => {
+    if (ref === null || ref.current === null) {
+      return;
+    }
+
+    ref.current.setSelectionRange(position, position);
+  }, [ref, data, position]);
+
+  const hasWarning = phone.length > 0 && errors.length > 0;
+  const msg = hasWarning ? errors[0] : message;
+
+  const focusHandler = useCallback(() => {
+    setFocused(true);
+  }, [setFocused]);
+  const blurHandler = useCallback(() => {
+    setFocused(false);
+  }, [setFocused]);
 
   return (
     <InputWrapper
-      errorMessage={isCorrect ? "" : PHONE_ERROR_MESSAGE}
+      message={msg}
+      warning={hasWarning}
+      error={error}
       label={label}
-      render={(inputClasses) => (
+      render={(classes) => (
         <input
-          className={inputClasses}
-          placeholder={"7xxxxxxxxxx"}
-          value={phone}
+          ref={ref}
+          className={classes}
+          value={isFocused || phone.length !== 0 ? template : ""}
+          placeholder={
+            !isFocused && phone.length === 0 ? PHONE_PLACEHOLDER : ""
+          }
+          onClick={changePosition}
           onChange={changeHandler}
+          onFocus={focusHandler}
+          onBlur={blurHandler}
         />
       )}
     />

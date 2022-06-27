@@ -1,5 +1,4 @@
 import { FunctionComponent } from "react";
-import { Status } from "../../constants";
 
 export type TFormProps = {};
 
@@ -9,15 +8,17 @@ export type TState = {
   name: string | null;
   email: string | null;
   phone: string | null;
-  birthday: number | null;
+  date: string | null;
   text: string | null;
 };
 
-export type TUsePost = () => {
-  status: Status;
-  setStatus: (newStatus: Status) => void;
-  post: TPost;
-};
-export type TPost = (state: TState) => void;
-
 export type TGetEmptyData = () => TState;
+
+export type TValidateState = (state: TState) => boolean;
+
+export type TChangeHandler = (
+  field: keyof TState,
+  value: TState[keyof TState]
+) => void;
+
+export type TSubmit = () => Promise<void>;

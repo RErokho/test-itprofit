@@ -16,6 +16,10 @@
     padding: 5px;
     color: $primary;
 
+    &__warning {
+      color: $warning-primary;
+    }
+
     &__error {
       color: $error-primary;
     }
@@ -34,16 +38,28 @@
 
     background-color: $quaternary;
 
+    &__warning {
+      border-color: $warning-primary;
+      background-color: $warning-secondary;
+    }
+
     &__error {
       border-color: $error-primary;
       background-color: $error-secondary;
     }
   }
 
-  .errorMessage {
+  .message {
     @include small-text;
 
     padding: 5px;
-    color: $error-primary;
+
+    &__warning {
+      color: $warning-primary;
+    }
+
+    &__error {
+      color: $error-primary;
+    }
   }
 }

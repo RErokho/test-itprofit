@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import App from "./components/App";
 
 import "./styles/reset.scss";
+import "./styles/shared.scss";
 
 const container = document.getElementById("root") as HTMLElement;
 

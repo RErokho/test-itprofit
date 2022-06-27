@@ -1,41 +1,34 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 
-import { DATE_ERROR_MESSAGE } from "../../constants";
-import { TInputChangeHandler } from "../../shared/types";
+import styles from "./styles.module.scss";
+import { TDateInput } from "./types";
+import { DATE_PLACEHOLDER } from "./constants";
 
 import InputWrapper from "../InputWrapper";
 
-import { TDateInput } from "./types";
-import styles from "./styles.module.scss";
+import useValidate from "../../hooks/useValidate";
+import { TInputChangeHandler } from "../../shared/types";
+import { ValidatorField } from "../../hooks/useValidate/constants";
 
 const DateInput: TDateInput = (props) => {
-  const { value = null, onChange, label } = props;
+  const { value, onChange, label, error, message } = props;
 
-  const [date, setDate] = useState<Date | null>(
-    value === null ? null : new Date(value)
-  );
-  const [isCorrect, setIsCorrect] = useState<boolean>(true);
   const ref = useRef<HTMLInputElement>(null);
+  const [date, setDate] = useState<string | null>(value);
+  const errors = useValidate(ValidatorField.Date, date || "");
 
   const changeHandler: TInputChangeHandler = useCallback(
     (event) => {
       const { value } = event.target;
 
-      const date = value.length === 0 ? null : new Date(event.target.value);
-
-      setDate(date);
-
-      const isCorrectDate = date === null ? false : date <= new Date();
-
-      setIsCorrect(isCorrectDate);
-
-      // @ts-ignore
-      onChange(isCorrectDate ? date.valueOf() : null);
+      onChange(
+        value.length === 0 ? null : new Date(value).valueOf().toString()
+      );
     },
-    [onChange, setDate, setIsCorrect]
+    [setDate]
   );
 
-  const onCLick = useCallback(() => {
+  const clickHandler = useCallback(() => {
     const current = ref.current;
 
     // @ts-ignore
@@ -45,23 +38,37 @@ const DateInput: TDateInput = (props) => {
     }
   }, [ref]);
 
+  /*
+    Update 'date' if 'value' changes
+  */
   useEffect(() => {
-    setDate(value === null ? null : new Date(value));
-  }, [value]);
+    if (value === date) {
+      return;
+    }
+
+    setDate(value);
+  }, [setDate, value, date]);
+
+  const hasWarning = date !== null && errors.length > 0;
+  const msg = hasWarning ? errors[0] : message;
+
+  const resultDate =
+    date === null ? "" : new Date(Number(date)).toLocaleDateString();
 
   return (
     <InputWrapper
-      errorMessage={isCorrect ? "" : DATE_ERROR_MESSAGE}
+      message={msg}
+      warning={hasWarning}
+      error={error}
       label={label}
-      render={(inputClasses) => (
+      render={(classes) => (
         <>
           <input
-            type={"text"}
-            className={inputClasses}
-            value={date === null ? "" : date.toLocaleDateString()}
-            placeholder={"MM/DD/YYYY"}
-            onClick={onCLick}
-            onChange={changeHandler}
+            className={classes}
+            value={resultDate}
+            placeholder={DATE_PLACEHOLDER}
+            onClick={clickHandler}
+            onChange={() => {}}
           />
           <div className={styles.dateInputContainer}>
             <input

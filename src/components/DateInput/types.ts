@@ -3,8 +3,11 @@ import { FunctionComponent } from "react";
 export type TDateInputProps = {
   label: string;
 
-  onChange: (date: number | null) => void;
-  value: number | null;
+  error?: boolean | undefined;
+  message?: string | undefined;
+
+  onChange: (value: string | null) => void;
+  value: string | null;
 };
 
 export type TDateInput = FunctionComponent<TDateInputProps>;

@@ -3,31 +3,20 @@ import { FunctionComponent } from "react";
 export type TNameInputProps = {
   label: string;
 
+  error?: boolean | undefined;
+  message?: string | undefined;
+
   onChange: (value: string | null) => void;
   value: string | null;
 };
 
 export type TNameInput = FunctionComponent<TNameInputProps>;
 
-export type TValue = {
-  name: string;
-  surname: string;
+export type TData = {
+  name: string | null;
+  position: number | null;
 };
 
-export type TGetData = (str: string) => TValue;
+export type TReplaceValue = (value: string) => string;
 
-export type TResult = {
-  nameMinLength: boolean;
-  surnameMinLength: boolean;
-  nameMaxLength: boolean;
-  surnameMaxLength: boolean;
-};
-
-export type TValidate = (value: TValue) => TResult;
-
-export type TUpdateValue = (data: string) => void;
-
-export type TUseValidate = () => {
-  error: string | null;
-  updateValue: TUpdateValue;
-};
+export type TGetNewData = (name: string | null) => TData;

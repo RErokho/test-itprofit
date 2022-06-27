@@ -1,45 +1,61 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
 
-import { TInputChangeHandler } from "../../shared/types";
-import { EMAIL_ERROR_MESSAGE, EMAIL_REG } from "../../constants";
+import { TEMailInput } from "./types";
+import { EMAIL_PLACEHOLDER, SPACE_REG } from "./constants";
 
 import InputWrapper from "../InputWrapper";
 
-import { TEMailInput } from "./types";
+import useValidate from "../../hooks/useValidate";
+import { TInputChangeHandler } from "../../shared/types";
+import { ValidatorField } from "../../hooks/useValidate/constants";
+import { MAIL_REG } from "../../shared/constants";
 
 const EmailInput: TEMailInput = (props) => {
-  const { value, onChange, label } = props;
+  const { value, onChange, label, error, message } = props;
 
-  const [email, setEmail] = useState<string>(value || "");
-  const [isCorrect, setIsCorrect] = useState<boolean>(true);
+  const [email, setEmail] = useState<string | null>(value);
+  const errors = useValidate(ValidatorField.EMail, email);
 
   const changeHandler: TInputChangeHandler = useCallback(
     (event) => {
       const { value } = event.target;
 
-      const isCorrect = EMAIL_REG.test(value);
+      if (!MAIL_REG.test(value)) {
+        return;
+      }
 
-      setIsCorrect(isCorrect);
-      setEmail(value);
+      const newValue = value.replace(SPACE_REG, "");
 
-      onChange(isCorrect ? value.replace(/\s/g, "") : null);
+      onChange(newValue);
     },
-    [onChange, setIsCorrect]
+    [setEmail, onChange]
   );
 
+  /*
+    Update 'email' if 'value' changes
+  */
   useEffect(() => {
-    setEmail(value || "");
-  }, [value]);
+    if (value === email) {
+      return;
+    }
+
+    setEmail(value);
+  }, [setEmail, value, email]);
+
+  const hasWarning = email !== null && email.length > 0 && errors.length > 0;
+  const msg = hasWarning ? errors[0] : message;
 
   return (
     <InputWrapper
-      errorMessage={isCorrect ? "" : EMAIL_ERROR_MESSAGE}
+      message={msg}
+      warning={hasWarning}
+      error={error}
       label={label}
-      render={(inputClasses) => (
+      render={(classes) => (
         <input
-          className={inputClasses}
-          placeholder={"my-mail@box.region"}
-          value={email}
+          className={classes}
+          placeholder={EMAIL_PLACEHOLDER}
+          value={email || ""}
           onChange={changeHandler}
         />
       )}

@@ -1,10 +1,11 @@
 import React, { memo } from "react";
 
+import styles from "./styles.module.scss";
+import { TApp } from "./types";
+
 import Form from "../Form";
 
-import styles from "./styles.module.scss";
-
-const App = () => {
+const App: TApp = () => {
   return (
     <div className={styles.container}>
       <Form />
