@@ -1,5 +1,5 @@
 export const LATIN_NUM_PUNCT_REG = new RegExp(
-  "^[A-Za-z0-9.,\"'\\/#!$%\\^&\\*;:{}=\\-_`~()\\[\\]]*$"
+  "^[ A-Za-z0-9.,\"'\\/#!$%\\^&\\*;:{}=\\-_`~()\\[\\]]*$"
 );
 
 export const MAIL_REG = new RegExp("^[A-Za-z0-9@.]*$");
