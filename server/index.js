@@ -29,6 +29,14 @@ app.post("/api/registration", (req, res) => {
   }, Math.random() * 1000);
 });
 
+app.get("/api/ping", (req, res) => {
+    res.statusCode = 200;
+    res.send({
+        status: "success",
+        message: "Server is ready",
+    });
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
